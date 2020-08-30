@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { compose } from 'recompose';
 import { withRouter } from 'react-router-dom';
 import * as ROUTES from '../../constants/routes';
@@ -13,27 +13,26 @@ const ERROR_MSG_ACCOUNT_EXISTS = `
   your personal account page.
 `;
 
-const INITIAL_STATE = {
-  email: '',
-  password: '',
-  error: null,
-};
-
-class SignInFormBase extends Component {
+class SignInGoogleBase extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = { ...INITIAL_STATE };
+    this.state = {
+      error: null,
+    };
   }
 
   onSubmit = (event) => {
-    const { email, password } = this.state;
     const { history, firebase } = this.props;
-
     firebase
-      .doSignInWithEmailAndPassword(email, password)
+      .doSignInWithGoogle()
+      .then((socialAuthUser) => firebase.user(socialAuthUser.user.uid).set({
+        username: socialAuthUser.user.displayName,
+        email: socialAuthUser.user.email,
+        roles: {},
+      }))
       .then(() => {
-        this.setState({ ...INITIAL_STATE });
+        this.setState({ error: null });
         history.push(ROUTES.HOME);
       })
       .catch((error) => {
@@ -47,36 +46,12 @@ class SignInFormBase extends Component {
     event.preventDefault();
   };
 
-  onChange = (event) => {
-    this.setState({
-      [event.target.name]: event.target.value,
-    });
-  };
-
   render() {
-    const { email, password, error } = this.state;
-
-    const isInvalid = password === '' || email === '';
+    const { error } = this.state;
 
     return (
       <form onSubmit={this.onSubmit}>
-        <input
-          name="email"
-          value={email}
-          onChange={this.onChange}
-          type="text"
-          placeholder="Email Address"
-        />
-        <input
-          name="password"
-          value={password}
-          onChange={this.onChange}
-          type="password"
-          placeholder="Password"
-        />
-        <button disabled={isInvalid} type="submit">
-          Sign In
-        </button>
+        <button type="submit">Sign In with Google</button>
 
         {error && <p>{error.message}</p>}
       </form>
@@ -84,9 +59,9 @@ class SignInFormBase extends Component {
   }
 }
 
-const SignInForm = compose(
+const SignInGoogle = compose(
   withRouter,
   withFirebase,
-)(SignInFormBase);
+)(SignInGoogleBase);
 
-export default SignInForm;
+export default SignInGoogle;
