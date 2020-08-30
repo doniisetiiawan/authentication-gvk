@@ -8,7 +8,7 @@ function Navigation() {
     <div>
       <AuthUserContext.Consumer>
         {(authUser) => (authUser ? (
-          <NavigationAuth />
+          <NavigationAuth authUser={authUser} />
         ) : (
           <NavigationNonAuth />
         ))}

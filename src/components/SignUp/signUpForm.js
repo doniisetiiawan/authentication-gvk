@@ -1,14 +1,17 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import React from 'react';
 import { withRouter } from 'react-router-dom';
 import { compose } from 'recompose';
 import { withFirebase } from '../Firebase';
 import * as ROUTES from '../../constants/routes';
+import * as ROLES from '../../constants/roles';
 
 const INITIAL_STATE = {
   username: '',
   email: '',
   passwordOne: '',
   passwordTwo: '',
+  isAdmin: false,
   error: null,
 };
 
@@ -26,17 +29,27 @@ class SignUpFormBase extends React.Component {
   };
 
   onSubmit = (event) => {
-    const { username, email, passwordOne } = this.state;
+    const {
+      username,
+      email,
+      passwordOne,
+      isAdmin,
+    } = this.state;
+    const roles = {};
+
+    if (isAdmin) {
+      roles[ROLES.ADMIN] = ROLES.ADMIN;
+    }
+
     const { firebase, history } = this.props;
 
     firebase
       .doCreateUserWithEmailAndPassword(email, passwordOne)
-      .then((authUser) => firebase
-        .user(authUser.user.uid)
-        .set({
-          username,
-          email,
-        }))
+      .then((authUser) => firebase.user(authUser.user.uid).set({
+        username,
+        email,
+        roles,
+      }))
       .then(() => {
         this.setState({ ...INITIAL_STATE });
         history.push(ROUTES.HOME);
@@ -47,12 +60,19 @@ class SignUpFormBase extends React.Component {
     event.preventDefault();
   };
 
+  onChangeCheckbox = (event) => {
+    this.setState({
+      [event.target.name]: event.target.checked,
+    });
+  };
+
   render() {
     const {
       username,
       email,
       passwordOne,
       passwordTwo,
+      isAdmin,
       error,
     } = this.state;
 
@@ -91,6 +111,15 @@ class SignUpFormBase extends React.Component {
           type="password"
           placeholder="Confirm Password"
         />
+        <label>
+          Admin:
+          <input
+            name="isAdmin"
+            type="checkbox"
+            checked={isAdmin}
+            onChange={this.onChangeCheckbox}
+          />
+        </label>
         <button disabled={isInvalid} type="submit">
           Sign Up
         </button>
