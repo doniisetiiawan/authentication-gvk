@@ -37,7 +37,7 @@ const AdminPage = () => (
 const condition = (authUser) => authUser && !!authUser.roles[ROLES.ADMIN];
 
 export default compose(
-  // withEmailVerification,
+  withEmailVerification,
   withAuthorization(condition),
   withFirebase,
 )(AdminPage);
