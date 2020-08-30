@@ -31,14 +31,19 @@ class SignUpFormBase extends React.Component {
 
     firebase
       .doCreateUserWithEmailAndPassword(email, passwordOne)
-      .then((authUser) => {
+      .then((authUser) => firebase
+        .user(authUser.user.uid)
+        .set({
+          username,
+          email,
+        }))
+      .then(() => {
         this.setState({ ...INITIAL_STATE });
         history.push(ROUTES.HOME);
       })
       .catch((error) => {
         this.setState({ error });
       });
-
     event.preventDefault();
   };
 
