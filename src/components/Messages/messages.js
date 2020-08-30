@@ -19,6 +19,11 @@ class Messages extends React.Component {
     this.onListenForMessages();
   }
 
+  componentWillUnmount() {
+    const { firebase } = this.props;
+    firebase.messages().off();
+  }
+
   onListenForMessages() {
     this.setState({ loading: true });
 
@@ -47,11 +52,6 @@ class Messages extends React.Component {
           this.setState({ messages: null, loading: false });
         }
       });
-  }
-
-  componentWillUnmount() {
-    const { firebase } = this.props;
-    firebase.messages().off();
   }
 
   onChangeText = (event) => {
