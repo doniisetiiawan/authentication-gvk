@@ -50,6 +50,7 @@ class SignUpFormBase extends React.Component {
         email,
         roles,
       }))
+      .then(() => firebase.doSendEmailVerification())
       .then(() => {
         this.setState({ ...INITIAL_STATE });
         history.push(ROUTES.HOME);
